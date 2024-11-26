@@ -13,13 +13,11 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>
 
-cmake_minimum_required(VERSION 3.5.2)
+cmake_minimum_required(VERSION 3.16)
 
 project(ws C)
 
 set(CMAKE_C_STANDARD 99)
-
-include_directories(include)
 
 add_library(ws
     src/ws.c
@@ -29,7 +27,7 @@ add_library(ws
     src/utf8.c
 )
 
-target_include_directories(ws INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}")
+target_include_directories(ws PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include")
 
 if(WIN32)
 	target_link_libraries(ws pthread ws2_32 -static)

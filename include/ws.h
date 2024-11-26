@@ -265,6 +265,12 @@ extern "C" {
 		 */
 		void (*onmessage)(ws_cli_conn_t client,
 			const unsigned char *msg, uint64_t msg_size, int type);
+
+        /**
+         * @brief On base request event, called when a request is made
+         * and the path is either undefined or not a match.
+         */
+        uint64_t (*onbaserequest)(const char *req, uint64_t req_size, char **res);
 	};
 
 	/**
@@ -272,6 +278,11 @@ extern "C" {
 	 */
 	struct ws_server
 	{
+        /**
+         * @brief Optionnal pointer to a http path the wsServer will accept.
+         * If path is null, every path is accepted
+         */
+        const char *path;
 		/**
 		 * @brief Required hostname that the wsServer will bind to
 		 */
