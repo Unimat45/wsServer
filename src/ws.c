@@ -15,17 +15,16 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>
  */
 #define _POSIX_C_SOURCE 200809L
-#include <errno.h>
+// #include <errno.h>
 #include <fcntl.h>
-#include <pthread.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/time.h>
 #include <time.h>
+#include <crossp.h>
 
 /* clang-format off */
 #ifndef _WIN32
@@ -36,7 +35,6 @@
 #else
 #include <winsock2.h>
 #include <ws2tcpip.h>
-#include <windows.h>
 typedef int socklen_t;
 #endif
 /* clang-format on */
@@ -45,8 +43,6 @@ typedef int socklen_t;
 #ifndef MSG_NOSIGNAL
 #define MSG_NOSIGNAL 0
 #endif
-
-#include <unistd.h>
 
 #include <utf8.h>
 #include <ws.h>
@@ -72,7 +68,7 @@ struct ws_connection
 
 	/* Timeout thread and locks. */
 	pthread_mutex_t mtx_state;
-	pthread_cond_t cnd_state_close;
+	// pthread_cond_t cnd_state_close;
 	pthread_t thrd_tout;
 	bool close_thrd;
 
@@ -377,7 +373,7 @@ static void close_client(struct ws_connection *client, int lock)
 	if (lock)
 		pthread_mutex_lock(&mutex);
 			client->client_sock = -1;
-			pthread_cond_destroy(&client->cnd_state_close);
+			// pthread_cond_destroy(&client->cnd_state_close);
 			pthread_mutex_destroy(&client->mtx_state);
 			pthread_mutex_destroy(&client->mtx_snd);
 			pthread_mutex_destroy(&client->mtx_ping);
@@ -403,25 +399,26 @@ static void close_client(struct ws_connection *client, int lock)
 static void *close_timeout(void *p)
 {
 	struct ws_connection *conn = p;
-	struct timespec ts;
+	// struct timespec ts;
+
 	int state;
 
 	pthread_mutex_lock(&conn->mtx_state);
 
-	clock_gettime(CLOCK_REALTIME, &ts);
-	ts.tv_nsec += MS_TO_NS(TIMEOUT_MS);
+	// clock_gettime(CLOCK_REALTIME, &ts);
+	// ts.tv_nsec += MS_TO_NS(TIMEOUT_MS);
 
 	/* Normalize the time. */
-	while (ts.tv_nsec >= 1000000000)
-	{
-		ts.tv_sec++;
-		ts.tv_nsec -= 1000000000;
-	}
+	// while (ts.tv_nsec >= 1000000000)
+	// {
+	// 	ts.tv_sec++;
+	// 	ts.tv_nsec -= 1000000000;
+	// }
 
-	while (conn->state != WS_STATE_CLOSED &&
-		   pthread_cond_timedwait(&conn->cnd_state_close, &conn->mtx_state, &ts) !=
-			   ETIMEDOUT)
-		;
+	// while (conn->state != WS_STATE_CLOSED &&
+	// 	   pthread_cond_timedwait(&conn->cnd_state_close, &conn->mtx_state, &ts) !=
+	// 		   ETIMEDOUT)
+	// 	;
 
 	state = conn->state;
 	pthread_mutex_unlock(&conn->mtx_state);
@@ -1812,7 +1809,7 @@ closed:
 	/* Wait for timeout thread if necessary. */
 	if (clse_thrd)
 	{
-		pthread_cond_signal(&client->cnd_state_close);
+		// pthread_cond_signal(&client->cnd_state_close);
 		pthread_join(client->thrd_tout, NULL);
 	}
 
@@ -1905,8 +1902,8 @@ static void *ws_accept(void *data)
 
 				if (pthread_mutex_init(&client_socks[i].mtx_state, NULL))
 					panic("Error on allocating close mutex");
-				if (pthread_cond_init(&client_socks[i].cnd_state_close, NULL))
-					panic("Error on allocating condition var\n");
+				// if (pthread_cond_init(&client_socks[i].cnd_state_close, NULL))
+				// 	panic("Error on allocating condition var\n");
 				if (pthread_mutex_init(&client_socks[i].mtx_snd, NULL))
 					panic("Error on allocating send mutex");
 				if (pthread_mutex_init(&client_socks[i].mtx_ping, NULL))

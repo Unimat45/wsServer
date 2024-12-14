@@ -17,9 +17,8 @@
 
 #include <stdbool.h>
 #include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
 #include <ws.h>
+#include <inttypes.h>
 
 /**
  * @dir examples/
@@ -43,7 +42,7 @@
 void onopen(ws_cli_conn_t client)
 {
 	char *cli, *port;
-	cli  = ws_getaddress(client);
+	cli = ws_getaddress(client);
 	port = ws_getport(client);
 #ifndef DISABLE_VERBOSE
 	printf("Connection opened, addr: %s, port: %s\n", cli, port);
@@ -80,14 +79,14 @@ void onclose(ws_cli_conn_t client)
  *
  * @param type Message type.
  */
-void onmessage(ws_cli_conn_t client,
-	const unsigned char *msg, uint64_t size, int type)
+void onmessage(
+	ws_cli_conn_t client, const unsigned char *msg, uint64_t size, int type)
 {
 	char *cli;
 	cli = ws_getaddress(client);
 #ifndef DISABLE_VERBOSE
-	printf("I receive a message: %s (size: %" PRId64 ", type: %d), from: %s\n",
-		msg, size, type, cli);
+	printf("I receive a message: %s (size: %" PRId64 ", type: %d), from: %s\n", msg,
+		size, type, cli);
 #endif
 
 	/**
@@ -116,21 +115,19 @@ void onmessage(ws_cli_conn_t client,
  */
 int main(void)
 {
-	ws_socket(&(struct ws_server){
-		/*
-		 * Bind host:
-		 * localhost -> localhost/127.0.0.1
-		 * 0.0.0.0   -> global IPv4
-		 * ::        -> global IPv4+IPv6 (DualStack)
-		 */
+	ws_socket(&(struct ws_server){/*
+								   * Bind host:
+								   * localhost -> localhost/127.0.0.1
+								   * 0.0.0.0   -> global IPv4
+								   * ::        -> global IPv4+IPv6 (DualStack)
+								   */
 		.host = "0.0.0.0",
 		.port = 8080,
-		.thread_loop   = 0,
-		.timeout_ms    = 1000,
-		.evs.onopen    = &onopen,
-		.evs.onclose   = &onclose,
-		.evs.onmessage = &onmessage
-	});
+		.thread_loop = 0,
+		.timeout_ms = 1000,
+		.evs.onopen = &onopen,
+		.evs.onclose = &onclose,
+		.evs.onmessage = &onmessage});
 
 	/*
 	 * If you want to execute code past ws_socket(), set

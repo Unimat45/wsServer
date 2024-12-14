@@ -19,10 +19,11 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stddef.h>
+#include "crossp.h"
 #include <inttypes.h>
-#include <unistd.h>
 
 #ifndef _WIN32
+#include <unistd.h>
 #include <arpa/inet.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -31,6 +32,7 @@
 #include <ws2tcpip.h>
 #include <windows.h>
 typedef unsigned long in_addr_t;
+
 #endif
 
 /* Windows and macOS seems to not have MSG_NOSIGNAL */

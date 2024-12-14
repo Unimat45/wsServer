@@ -17,9 +17,15 @@
 
 #include <stdbool.h>
 #include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
 #include <ws.h>
+
+#ifdef _WIN32
+#define WIN32_LEAN_AND_MEAN
+#include <Windows.h>
+#define sleep(s) Sleep(s * 1000)
+#else
+#include <unistd.h>
+#endif
 
 /**
  * @dir examples/ping

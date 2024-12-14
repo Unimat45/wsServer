@@ -22,6 +22,7 @@ set(CMAKE_C_STANDARD 99)
 add_library(ws
     src/ws.c
     src/base64.c
+    src/crossp.c
     src/sha1.c
     src/handshake.c
     src/utf8.c
@@ -30,31 +31,38 @@ add_library(ws
 target_include_directories(ws PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include")
 
 if(WIN32)
-	target_link_libraries(ws pthread ws2_32 -static)
+    target_link_libraries(ws ws2_32 -static)
 else()
-	target_link_libraries(ws pthread)
+    target_link_libraries(ws pthread)
 endif(WIN32)
 
-add_executable(toyws_test
-    extra/toyws/tws_test.c
-    extra/toyws/toyws.c)
+option(BUILD_TOYWS "Build the toy ws client" OFF)
 
-if(WIN32)
-    target_link_libraries(toyws_test ws2_32 -static)
-endif(WIN32)
+if(BUILD_TOYWS)
+    add_executable(toyws_test
+        extra/toyws/tws_test.c
+        extra/toyws/toyws.c)
+
+    if(WIN32)
+        target_link_libraries(toyws_test ws2_32 -static)
+    endif(WIN32)
+endif()
 
 # Examples files
 add_subdirectory(examples)
 
 option(ENABLE_WSSERVER_TEST "Enable wsServer testing (requires Autobahn)" OFF)
+
 if(ENABLE_WSSERVER_TEST)
-	enable_testing()
-	# Disable verbose output of echo
-	target_compile_definitions(echo PRIVATE DISABLE_VERBOSE)
-	add_subdirectory(tests)
+    enable_testing()
+
+    # Disable verbose output of echo
+    target_compile_definitions(echo PRIVATE DISABLE_VERBOSE)
+    add_subdirectory(tests)
 endif(ENABLE_WSSERVER_TEST)
 
 option(VALIDATE_UTF8 "Enable UTF-8 validation (default ON)" ON)
+
 if(VALIDATE_UTF8)
-	target_compile_definitions(ws PRIVATE VALIDATE_UTF8)
+    target_compile_definitions(ws PRIVATE VALIDATE_UTF8)
 endif(VALIDATE_UTF8)

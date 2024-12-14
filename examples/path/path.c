@@ -19,8 +19,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
 #include <ws.h>
+#include <inttypes.h>
 
 /**
  * @dir examples/

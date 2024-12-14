@@ -18,11 +18,12 @@
 #include <base64.h>
 #include <sha1.h>
 #include <ws.h>
+#include <crossp.h>
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <strings.h>
+
 
 /**
  * @dir src/
@@ -86,7 +87,7 @@ static char *strstricase(const char *haystack, const char *needle)
 {
 	size_t length;
 	for (length = strlen(needle); *haystack; haystack++)
-		if (!strncasecmp(haystack, needle, length))
+		if (!strincmp(haystack, needle, length))
 			return (char*)haystack;
 	return (NULL);
 }
