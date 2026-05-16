@@ -105,6 +105,10 @@ static struct ws_connection client_socks[MAX_CLIENTS];
  * @brief Timeout to a single send().
  */
 static uint32_t timeout;
+static volatile int ws_stop = 0;
+static int srv_sock = -1;
+static pthread_t ws_accept_thread;
+static int ws_has_accept_thread = 0;
 
 /**
  * @brief Client validity macro
@@ -1862,12 +1866,16 @@ static void *ws_accept(void *data)
 	sock = ws_prm->sock;
 	salen = sizeof(sa);
 
-	while (1)
+	while (!ws_stop)
 	{
 		/* Accept. */
 		new_sock = accept(sock, (struct sockaddr *)&sa, &salen);
 		if (new_sock < 0)
+		{
+			if (ws_stop)
+				break;
 			panic("Error on accepting connections..");
+		}
 
 		if (timeout)
 		{
@@ -2053,17 +2061,33 @@ int ws_socket(struct ws_server *ws_srv)
 
 	/* Accept connections. */
 	ws_prm->sock = sock;
+	srv_sock = sock;
 
 	if (!ws_srv->thread_loop)
 		ws_accept(ws_prm);
 	else
 	{
-		if (pthread_create(&accept_thread, NULL, ws_accept, (void *)ws_prm))
+		if (pthread_create(&ws_accept_thread, NULL, ws_accept, (void *)ws_prm))
 			panic("Could not create the client thread!");
-		pthread_detach(accept_thread);
+		ws_has_accept_thread = 1;
 	}
 
 	return (0);
+}
+
+void ws_shutdown(void)
+{
+	ws_stop = 1;
+	if (srv_sock >= 0)
+	{
+		close_socket(srv_sock);
+		srv_sock = -1;
+	}
+	if (ws_has_accept_thread)
+	{
+		pthread_join(ws_accept_thread, NULL);
+		ws_has_accept_thread = 0;
+	}
 }
 
 #ifdef AFL_FUZZ

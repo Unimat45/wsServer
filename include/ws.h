@@ -333,6 +333,7 @@ extern "C" {
 	extern int ws_get_state(ws_cli_conn_t client);
 	extern int ws_close_client(ws_cli_conn_t client);
 	extern int ws_socket(struct ws_server *ws_srv);
+	extern void ws_shutdown(void);
 
 	/* Ping routines. */
 	extern void ws_ping(ws_cli_conn_t cid, int threshold);
